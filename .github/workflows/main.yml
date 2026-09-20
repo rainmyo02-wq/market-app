@@ -30,11 +30,12 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Install Dependencies
+      - name: Install Dependencies & Bundle Requests
         run: |
           python -m pip install --upgrade pip
           pip install flet-cli
-          pip install requests
+          pip install requests -t requests_module
+          python -c "import os, shutil; shutil.copytree('requests_module/requests', 'requests', dirs_exist_ok=True); shutil.copytree('requests_module/urllib3', 'urllib3', dirs_exist_ok=True); shutil.copytree('requests_module/idna', 'idna', dirs_exist_ok=True); shutil.copytree('requests_module/certifi', 'certifi', dirs_exist_ok=True); shutil.copytree('requests_module/charset_normalizer', 'charset_normalizer', dirs_exist_ok=True)"
 
       - name: Build APK
         run: flet build apk --yes
