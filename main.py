@@ -1,6 +1,38 @@
 import flet as ft
 import requests
-import yfinance as yf
+
+# Stock/Crypto ဈေးနှုန်းယူသည့် Helper Function
+def get_market_data(symbol):
+    try:
+        # Yahoo Finance API URL
+        url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        
+        response = requests.get(url, headers=headers)
+        data = response.json()
+        
+        # Current Price ကို ဆွဲထုတ်ခြင်း
+        meta = data['chart']['result'][0]['meta']
+        price = meta['regularMarketPrice']
+        currency = meta['currency']
+        
+        return f"{price} {currency}"
+    except Exception as e:
+        return "Error fetching data"
+
+# Flet App Main Function
+def main(page: ft.Page):
+    page.title = "Global Market Dashboard"
+    
+    # ဥပမာ- Bitcoin (BTC-USD) သို့မဟုတ် Apple (AAPL) ဈေးနှုန်းပြခြင်း
+    btc_price = get_market_data("BTC-USD")
+    
+    page.add(
+        ft.Text("Market Dashboard", size=30, weight=ft.FontWeight.BOLD),
+        ft.Text(f"Bitcoin Price: {btc_price}", size=20)
+    )
+
+ft.app(target=main)
 
 
 def main(page: ft.Page):
