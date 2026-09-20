@@ -1,4 +1,5 @@
 import flet as ft
+from flet import app
 import requests
 
 def get_market_data(symbol):
@@ -25,4 +26,4 @@ def main(page: ft.Page):
     )
 
 if __name__ == "__main__":
-    ft.app(target=main)
+    app(target=main)
