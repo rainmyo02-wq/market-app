@@ -6,23 +6,19 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,html,css,js
 version = 0.1
 
-# Requirements
-requirements = python3,kivy
+# Requirements (Python3.11 သို့မဟုတ် Kivy သာ သတ်မှတ်မည်)
+requirements = python3==3.11.0,kivy
 
 orientation = portrait
-osx.python_version = 3
-osx.kivy_version = 1.9.1
-
 fullscreen = 0
 android.permissions = INTERNET
 
-# SDK, NDK & API Settings (Ubuntu 24.04/22.04 နှင့် ကိုက်ညီအောင် ပြင်ထားသည်)
+# SDK, NDK & API Settings
 android.api = 33
 android.minapi = 21
 android.ndk = 25b
-android.ndk_api = 21
 android.accept_sdk_license = True
-android.archs = arm64-v8a, armeabi-v7a
+android.archs = arm64-v8a
 
 [buildozer]
 log_level = 2
