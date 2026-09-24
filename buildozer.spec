@@ -13,9 +13,12 @@ osx.kivy_version = 1.9.1
 
 fullscreen = 0
 android.permissions = INTERNET
-android.api = 33
+
+# SDK & License သတ်မှတ်ချက်များ (License Error မတက်စေရန် ပြင်ထားသည်)
+android.api = 31
 android.minapi = 21
 android.ndk = 25b
+android.accept_sdk_license = True
 
 [buildozer]
 log_level = 2
