@@ -5,6 +5,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
+from kivy.uix.image import AsyncImage
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.graphics import Color, RoundedRectangle
 from kivy.core.window import Window
@@ -31,33 +32,37 @@ class LoginScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         
-        layout = BoxLayout(orientation='vertical', padding=dp(20), spacing=dp(15))
+        # Center Content Container
+        main_box = BoxLayout(orientation='vertical', padding=dp(20), spacing=dp(15))
+        
+        # Centered Inner Form
+        form_box = BoxLayout(orientation='vertical', size_hint_y=None, spacing=dp(12))
+        form_box.bind(minimum_height=form_box.setter('height'))
 
         # Header
         logo = Label(
             text="[b][color=ff9900]amazon[/color][color=ffffff] zone[/color][/b]",
             markup=True,
-            font_size='28sp',
+            font_size='32sp',
             size_hint_y=None,
-            height=dp(60)
+            height=dp(50)
         )
         
         welcome_label = Label(
-            text="[b]Sign in to your account[/b]",
-            markup=True,
-            font_size='16sp',
+            text="Sign in to your account",
+            font_size='15sp',
             size_hint_y=None,
-            height=dp(30),
-            color=(0.9, 0.9, 0.9, 1)
+            height=dp(25),
+            color=(0.8, 0.8, 0.8, 1)
         )
 
         # Input Box
-        input_box = CustomCard(
+        input_card = CustomCard(
             orientation='vertical', 
             size_hint_y=None,
-            height=dp(120),
+            height=dp(110),
             padding=dp(10), 
-            spacing=dp(10),
+            spacing=dp(8),
             bg_color=(0.14, 0.18, 0.24, 1)
         )
         
@@ -66,10 +71,10 @@ class LoginScreen(Screen):
             multiline=False,
             size_hint_y=None,
             height=dp(40),
-            padding=[dp(10), dp(8)],
+            padding=[dp(10), dp(10)],
             background_color=(0.09, 0.11, 0.15, 1),
             foreground_color=(1, 1, 1, 1),
-            hint_text_color=(0.6, 0.6, 0.6, 1)
+            hint_text_color=(0.5, 0.5, 0.5, 1)
         )
         
         self.pass_input = TextInput(
@@ -78,18 +83,16 @@ class LoginScreen(Screen):
             multiline=False,
             size_hint_y=None,
             height=dp(40),
-            padding=[dp(10), dp(8)],
+            padding=[dp(10), dp(10)],
             background_color=(0.09, 0.11, 0.15, 1),
             foreground_color=(1, 1, 1, 1),
-            hint_text_color=(0.6, 0.6, 0.6, 1)
+            hint_text_color=(0.5, 0.5, 0.5, 1)
         )
         
-        input_box.add_widget(self.email_input)
-        input_box.add_widget(self.pass_input)
+        input_card.add_widget(self.email_input)
+        input_card.add_widget(self.pass_input)
 
         # Buttons
-        btn_box = BoxLayout(orientation='vertical', size_hint_y=None, height=dp(150), spacing=dp(10))
-
         login_btn = Button(
             text="Continue",
             size_hint_y=None,
@@ -119,16 +122,19 @@ class LoginScreen(Screen):
         )
         guest_btn.bind(on_release=self.go_to_home)
 
-        btn_box.add_widget(login_btn)
-        btn_box.add_widget(google_btn)
-        btn_box.add_widget(guest_btn)
+        form_box.add_widget(logo)
+        form_box.add_widget(welcome_label)
+        form_box.add_widget(input_card)
+        form_box.add_widget(login_btn)
+        form_box.add_widget(google_btn)
+        form_box.add_widget(guest_btn)
 
-        layout.add_widget(logo)
-        layout.add_widget(welcome_label)
-        layout.add_widget(input_box)
-        layout.add_widget(btn_box)
+        # Push to middle
+        main_box.add_widget(Label(size_hint_y=0.15))
+        main_box.add_widget(form_box)
+        main_box.add_widget(Label(size_hint_y=0.15))
 
-        self.add_widget(layout)
+        self.add_widget(main_box)
 
     def go_to_home(self, instance):
         self.manager.current = 'home'
@@ -163,7 +169,7 @@ class HomeScreen(Screen):
             padding=[dp(8), dp(8)],
             background_color=(0.09, 0.11, 0.15, 1),
             foreground_color=(1, 1, 1, 1),
-            hint_text_color=(0.6, 0.6, 0.6, 1)
+            hint_text_color=(0.5, 0.5, 0.5, 1)
         )
 
         cart_btn = Button(
@@ -188,8 +194,8 @@ class HomeScreen(Screen):
         banner = CustomCard(
             bg_color=(0.99, 0.6, 0, 1),
             size_hint_y=None,
-            height=dp(80),
-            padding=dp(10),
+            height=dp(75),
+            padding=dp(8),
             orientation='vertical'
         )
         banner.add_widget(Label(text="[b]TODAY'S BIG DEALS[/b]", markup=True, font_size='16sp', color=(0,0,0,1)))
@@ -197,7 +203,7 @@ class HomeScreen(Screen):
         content_layout.add_widget(banner)
 
         # CATEGORIES HORIZONTAL SCROLL
-        cat_scroll = ScrollView(size_hint_y=None, height=dp(40), do_scroll_y=False)
+        cat_scroll = ScrollView(size_hint_y=None, height=dp(38), do_scroll_y=False)
         cat_grid = BoxLayout(spacing=dp(8), size_hint_x=None)
         cat_grid.bind(minimum_width=cat_grid.setter('width'))
 
@@ -206,7 +212,7 @@ class HomeScreen(Screen):
             btn = Button(
                 text=cat,
                 size_hint_x=None,
-                width=dp(100),
+                width=dp(95),
                 background_color=(0.14, 0.18, 0.24, 1),
                 color=(1, 1, 1, 1)
             )
@@ -215,31 +221,64 @@ class HomeScreen(Screen):
         cat_scroll.add_widget(cat_grid)
         content_layout.add_widget(cat_scroll)
 
-        # PRODUCTS GRID (2 Columns)
+        # PRODUCTS GRID WITH IMAGES
         grid = GridLayout(cols=2, spacing=dp(10), size_hint_y=None)
         grid.bind(minimum_height=grid.setter('height'))
 
         products = [
-            {"name": "Echo Dot Smart", "price": "$39.99", "orig": "$49.99", "stars": "Rating: 4.6"},
-            {"name": "Kindle Paperwhite", "price": "$129.99", "orig": "$149.99", "stars": "Rating: 4.9"},
-            {"name": "Headphones", "price": "$89.00", "orig": "$119.00", "stars": "Rating: 4.7"},
-            {"name": "Fitness Watch", "price": "$55.50", "orig": "$70.00", "stars": "Rating: 4.5"},
+            {
+                "name": "Echo Dot Smart", 
+                "price": "$39.99", 
+                "orig": "$49.99", 
+                "stars": "Rating: 4.6",
+                "img": "https://m.media-amazon.com/images/I/6182S7MYCBL._AC_SL1000_.jpg"
+            },
+            {
+                "name": "Kindle Paperwhite", 
+                "price": "$129.99", 
+                "orig": "$149.99", 
+                "stars": "Rating: 4.9",
+                "img": "https://m.media-amazon.com/images/I/61fI1A07dSL._AC_SL1000_.jpg"
+            },
+            {
+                "name": "Headphones", 
+                "price": "$89.00", 
+                "orig": "$119.00", 
+                "stars": "Rating: 4.7",
+                "img": "https://m.media-amazon.com/images/I/51+u4+h36QL._AC_SL1000_.jpg"
+            },
+            {
+                "name": "Fitness Watch", 
+                "price": "$55.50", 
+                "orig": "$70.00", 
+                "stars": "Rating: 4.5",
+                "img": "https://m.media-amazon.com/images/I/61ZjlBOp+rL._AC_SL1500_.jpg"
+            },
         ]
 
         for p in products:
             card = CustomCard(
                 orientation='vertical',
                 size_hint_y=None,
-                height=dp(180),
+                height=dp(230),
                 padding=dp(8),
                 spacing=dp(4)
             )
             
+            # Product Image
+            p_img = AsyncImage(
+                source=p["img"],
+                size_hint_y=None,
+                height=dp(85),
+                allow_stretch=True,
+                keep_ratio=True
+            )
+
             stars = Label(
                 text=p["stars"], 
-                font_size='11sp', 
+                font_size='10sp', 
                 size_hint_y=None, 
-                height=dp(20),
+                height=dp(18),
                 color=(0.99, 0.6, 0, 1), 
                 halign='left', 
                 valign='middle'
@@ -249,9 +288,9 @@ class HomeScreen(Screen):
             title = Label(
                 text=f"[b]{p['name']}[/b]", 
                 markup=True, 
-                font_size='13sp', 
+                font_size='12sp', 
                 size_hint_y=None, 
-                height=dp(40),
+                height=dp(32),
                 halign='left', 
                 valign='top'
             )
@@ -262,7 +301,7 @@ class HomeScreen(Screen):
                 markup=True, 
                 font_size='12sp', 
                 size_hint_y=None, 
-                height=dp(25),
+                height=dp(22),
                 halign='left',
                 valign='middle'
             )
@@ -271,12 +310,13 @@ class HomeScreen(Screen):
             add_btn = Button(
                 text="Add to Cart",
                 size_hint_y=None,
-                height=dp(35),
+                height=dp(32),
                 background_color=(0.99, 0.6, 0, 1),
                 color=(0, 0, 0, 1),
                 bold=True
             )
 
+            card.add_widget(p_img)
             card.add_widget(stars)
             card.add_widget(title)
             card.add_widget(price)
