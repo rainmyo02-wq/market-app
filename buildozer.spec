@@ -8,7 +8,7 @@ source.include_exts = py,png,jpg,kv,atlas,html,css,js
 version = 0.1
 
 # Python Version ကို 3.11.0 အဖြစ် အတိအကျ သတ်မှတ်ထားပါသည်
-requirements = python3,kivy,openssl,requests,pollow,certifi
+requirements = python3==3.11.5,kivy==2.3.0,openssl,requests,pollow,certifi
 
 orientation = portrait
 fullscreen = 0
