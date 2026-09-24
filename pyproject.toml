@@ -2,6 +2,5 @@
 name = "market-app"
 version = "0.1.0"
 dependencies = [
-    "flet",
     "requests"
 ]
