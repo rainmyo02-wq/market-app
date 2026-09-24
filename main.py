@@ -5,10 +5,8 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
-from kivy.uix.image import AsyncImage
-from kivy.uix.checkbox import CheckBox
 from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.graphics import Color, RoundedRectangle
+from kivy.graphics import Color, RoundedRectangle, Ellipse, Rectangle
 from kivy.core.window import Window
 from kivy.metrics import dp
 
@@ -27,14 +25,32 @@ class CustomCard(BoxLayout):
         self.rect.pos = instance.pos
         self.rect.size = instance.size
 
-# ALL PRODUCTS DATA
+class ProductGraphicHolder(BoxLayout):
+    """ High-Quality Native Offline Image Graphics for Products """
+    def __init__(self, bg_color=(0.23, 0.51, 0.96, 1), shape="circle", **kwargs):
+        super().__init__(**kwargs)
+        self.shape_color = bg_color
+        self.shape_type = shape
+        with self.canvas.before:
+            Color(*bg_color)
+            if shape == "circle":
+                self.draw_obj = Ellipse(pos=self.pos, size=self.size)
+            else:
+                self.draw_obj = RoundedRectangle(pos=self.pos, size=self.size, radius=[10])
+        self.bind(pos=self._update, size=self._update)
+
+    def _update(self, instance, value):
+        padding = dp(10)
+        self.draw_obj.pos = (instance.pos[0] + padding, instance.pos[1] + padding)
+        self.draw_obj.size = (max(dp(10), instance.size[0] - padding*2), max(dp(10), instance.size[1] - padding*2))
+
 ALL_PRODUCTS = [
-    {"name": "Echo Dot Smart", "price": "$39.99", "orig": "$49.99", "cat": "Electronics", "img": "https://picsum.photos/id/100/200/200"},
-    {"name": "Kindle Paperwhite", "price": "$129.99", "orig": "$149.99", "cat": "Electronics", "img": "https://picsum.photos/id/101/200/200"},
-    {"name": "Headphones Wireless", "price": "$89.00", "orig": "$119.00", "cat": "Electronics", "img": "https://picsum.photos/id/102/200/200"},
-    {"name": "Fitness Smart Watch", "price": "$55.50", "orig": "$70.00", "cat": "Electronics", "img": "https://picsum.photos/id/103/200/200"},
-    {"name": "Leather Jacket", "price": "$120.00", "orig": "$150.00", "cat": "Fashion", "img": "https://picsum.photos/id/104/200/200"},
-    {"name": "Running Shoes", "price": "$75.00", "orig": "$95.00", "cat": "Fashion", "img": "https://picsum.photos/id/106/200/200"},
+    {"name": "Echo Dot Smart", "price": "$39.99", "orig": "$49.99", "cat": "Electronics", "color": (0.23, 0.51, 0.96, 1), "shape": "circle"},
+    {"name": "Kindle Paperwhite", "price": "$129.99", "orig": "$149.99", "cat": "Electronics", "color": (0.1, 0.7, 0.4, 1), "shape": "rect"},
+    {"name": "Headphones Wireless", "price": "$89.00", "orig": "$119.00", "cat": "Electronics", "color": (0.9, 0.4, 0.2, 1), "shape": "circle"},
+    {"name": "Fitness Smart Watch", "price": "$55.50", "orig": "$70.00", "cat": "Electronics", "color": (0.8, 0.2, 0.5, 1), "shape": "rect"},
+    {"name": "Leather Jacket", "price": "$120.00", "orig": "$150.00", "cat": "Fashion", "color": (0.6, 0.3, 0.8, 1), "shape": "rect"},
+    {"name": "Running Shoes", "price": "$75.00", "orig": "$95.00", "cat": "Fashion", "color": (0.2, 0.8, 0.8, 1), "shape": "circle"},
 ]
 
 # ================= 1. LOGIN SCREEN =================
@@ -104,7 +120,6 @@ class HomeScreen(Screen):
 
         logo = Label(text="[b][color=3b82f6]SHOP[/color] ZONE[/b]", markup=True, font_size='18sp', size_hint_x=0.35)
         
-        # SEARCH BAR (WORKING)
         self.search_input = TextInput(
             hint_text="Search Shop Zone...", multiline=False, size_hint_x=0.45,
             padding=[dp(8), dp(8)], background_color=(0.07, 0.09, 0.15, 1), foreground_color=(1, 1, 1, 1)
@@ -123,13 +138,11 @@ class HomeScreen(Screen):
         content_layout = BoxLayout(orientation='vertical', size_hint_y=None, padding=dp(10), spacing=dp(12))
         content_layout.bind(minimum_height=content_layout.setter('height'))
 
-        # BANNER
         banner = CustomCard(bg_color=(0.23, 0.51, 0.96, 1), size_hint_y=None, height=dp(65), padding=dp(8), orientation='vertical')
         banner.add_widget(Label(text="[b]SHOP ZONE SPECIAL DEALS[/b]", markup=True, font_size='15sp'))
         banner.add_widget(Label(text="Up to 50% OFF on Selected Items", font_size='11sp'))
         content_layout.add_widget(banner)
 
-        # PRODUCT GRID
         self.grid = GridLayout(cols=2, spacing=dp(10), size_hint_y=None)
         self.grid.bind(minimum_height=self.grid.setter('height'))
         
@@ -139,8 +152,7 @@ class HomeScreen(Screen):
         scroll.add_widget(content_layout)
         self.main_layout.add_widget(scroll)
 
-        # BOTTOM NAVIGATION (WORKING)
-        self.main_layout.add_widget(self.build_bottom_nav())
+        self.main_layout.add_widget(build_bottom_nav(self.manager, 'home'))
         self.add_widget(self.main_layout)
 
     def display_products(self, product_list):
@@ -148,8 +160,8 @@ class HomeScreen(Screen):
         for p in product_list:
             card = CustomCard(orientation='vertical', size_hint_y=None, height=dp(210), padding=dp(8), spacing=dp(4))
             
-            p_img = AsyncImage(source=p["img"], size_hint_y=None, height=dp(80), allow_stretch=True, keep_ratio=True)
-            rating = Label(text="Rating: 4.8 ⭐", font_size='10sp', size_hint_y=None, height=dp(18), color=(0.95, 0.77, 0.05, 1), halign='left')
+            p_img = ProductGraphicHolder(bg_color=p["color"], shape=p["shape"], size_hint_y=None, height=dp(70))
+            rating = Label(text="Rating: 4.8 Rating", font_size='10sp', size_hint_y=None, height=dp(18), color=(0.95, 0.77, 0.05, 1), halign='left')
             rating.bind(size=rating.setter('text_size'))
             
             title = Label(text=f"[b]{p['name']}[/b]", markup=True, font_size='12sp', size_hint_y=None, height=dp(28), halign='left', valign='top')
@@ -177,56 +189,149 @@ class HomeScreen(Screen):
         self.cart_count += 1
         self.cart_btn.text = f"Cart ({self.cart_count})"
 
-    def build_bottom_nav(self):
-        bottom_nav = BoxLayout(size_hint_y=None, height=dp(45), spacing=dp(2))
-        nav_items = [("Home", 'home'), ("Categories", 'categories'), ("Alerts", 'alerts'), ("Profile", 'profile')]
-        
-        for name, screen_name in nav_items:
-            btn = Button(text=name, background_color=(0.12, 0.16, 0.23, 1), color=(1, 1, 1, 1), font_size='11sp')
-            btn.bind(on_release=lambda x, s=screen_name: self.switch_screen(s))
-            bottom_nav.add_widget(btn)
-        return bottom_nav
-
-    def switch_screen(self, screen_name):
-        self.manager.current = screen_name
-
-# ================= OTHER NAV SCREENS =================
-class SimpleScreen(Screen):
-    def __init__(self, title_text, **kwargs):
+# ================= 3. CATEGORIES SCREEN =================
+class CategoriesScreen(Screen):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
         layout = BoxLayout(orientation='vertical')
         
         # Header
         top_bar = BoxLayout(size_hint_y=None, height=dp(50), padding=dp(10))
-        top_bar.add_widget(Label(text=f"[b]{title_text}[/b]", markup=True, font_size='20sp'))
+        with top_bar.canvas.before:
+            Color(0.12, 0.16, 0.23, 1)
+            Rectangle(pos=top_bar.pos, size=top_bar.size)
+        top_bar.add_widget(Label(text="[b]Product Categories[/b]", markup=True, font_size='18sp'))
         layout.add_widget(top_bar)
-        
-        # Body
-        layout.add_widget(Label(text=f"Welcome to {title_text} Page", font_size='16sp', color=(0.7,0.7,0.7,1)))
 
-        # Bottom Nav
-        bottom_nav = BoxLayout(size_hint_y=None, height=dp(45), spacing=dp(2))
-        nav_items = [("Home", 'home'), ("Categories", 'categories'), ("Alerts", 'alerts'), ("Profile", 'profile')]
-        for name, screen_name in nav_items:
-            btn = Button(text=name, background_color=(0.12, 0.16, 0.23, 1), color=(1, 1, 1, 1), font_size='11sp')
-            btn.bind(on_release=lambda x, s=screen_name: self.switch_screen(s))
-            bottom_nav.add_widget(btn)
-        
-        layout.add_widget(bottom_nav)
+        # Content
+        scroll = ScrollView()
+        cat_box = BoxLayout(orientation='vertical', size_hint_y=None, padding=dp(15), spacing=dp(12))
+        cat_box.bind(minimum_height=cat_box.setter('height'))
+
+        categories_data = [
+            ("📱 Electronics & Gadgets", "4 Products Available"),
+            ("👗 Fashion & Apparel", "2 Products Available"),
+            ("🏠 Home & Kitchen", "Coming Soon"),
+            ("🎮 Gaming & Consoles", "Coming Soon"),
+            ("📚 Books & Stationery", "Coming Soon"),
+        ]
+
+        for title, subtitle in categories_data:
+            card = CustomCard(orientation='vertical', size_hint_y=None, height=dp(70), padding=dp(12))
+            card.add_widget(Label(text=f"[b]{title}[/b]", markup=True, font_size='14sp', halign='left', size_hint_y=0.6))
+            card.add_widget(Label(text=subtitle, font_size='11sp', color=(0.6,0.6,0.6,1), halign='left', size_hint_y=0.4))
+            cat_box.add_widget(card)
+
+        scroll.add_widget(cat_box)
+        layout.add_widget(scroll)
+
+        layout.add_widget(build_bottom_nav(self.manager, 'categories'))
         self.add_widget(layout)
 
-    def switch_screen(self, screen_name):
-        self.manager.current = screen_name
+# ================= 4. ALERTS SCREEN =================
+class AlertsScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        layout = BoxLayout(orientation='vertical')
+        
+        top_bar = BoxLayout(size_hint_y=None, height=dp(50), padding=dp(10))
+        with top_bar.canvas.before:
+            Color(0.12, 0.16, 0.23, 1)
+            Rectangle(pos=top_bar.pos, size=top_bar.size)
+        top_bar.add_widget(Label(text="[b]Notifications & Alerts[/b]", markup=True, font_size='18sp'))
+        layout.add_widget(top_bar)
 
-# ================= 3. MAIN APP MANAGER =================
+        scroll = ScrollView()
+        alert_box = BoxLayout(orientation='vertical', size_hint_y=None, padding=dp(15), spacing=dp(12))
+        alert_box.bind(minimum_height=alert_box.setter('height'))
+
+        notifications = [
+            ("🎉 Welcome to Shop Zone!", "Thank you for installing Shop Zone App. Enjoy special discount deals today!"),
+            ("🔥 Big Promotion Discount", "Up to 50% discount available for all Electronics items."),
+            ("📦 Order Status System", "Real-time order tracking features will be available soon.")
+        ]
+
+        for n_title, n_desc in notifications:
+            card = CustomCard(orientation='vertical', size_hint_y=None, height=dp(80), padding=dp(12), spacing=dp(4))
+            card.add_widget(Label(text=f"[b]{n_title}[/b]", markup=True, font_size='13sp', halign='left', color=(0.23, 0.51, 0.96, 1), size_hint_y=0.4))
+            card.add_widget(Label(text=n_desc, font_size='11sp', color=(0.8,0.8,0.8,1), halign='left', size_hint_y=0.6))
+            alert_box.add_widget(card)
+
+        scroll.add_widget(alert_box)
+        layout.add_widget(scroll)
+
+        layout.add_widget(build_bottom_nav(self.manager, 'alerts'))
+        self.add_widget(layout)
+
+# ================= 5. PROFILE SCREEN =================
+class ProfileScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        layout = BoxLayout(orientation='vertical')
+        
+        top_bar = BoxLayout(size_hint_y=None, height=dp(50), padding=dp(10))
+        with top_bar.canvas.before:
+            Color(0.12, 0.16, 0.23, 1)
+            Rectangle(pos=top_bar.pos, size=top_bar.size)
+        top_bar.add_widget(Label(text="[b]My Profile & Account[/b]", markup=True, font_size='18sp'))
+        layout.add_widget(top_bar)
+
+        scroll = ScrollView()
+        prof_box = BoxLayout(orientation='vertical', size_hint_y=None, padding=dp(15), spacing=dp(12))
+        prof_box.bind(minimum_height=prof_box.setter('height'))
+
+        # User Card
+        user_card = CustomCard(orientation='vertical', size_hint_y=None, height=dp(80), padding=dp(12), bg_color=(0.23, 0.51, 0.96, 1))
+        user_card.add_widget(Label(text="[b]Shop Zone Customer[/b]", markup=True, font_size='16sp', halign='left'))
+        user_card.add_widget(Label(text="user@shopzone.com", font_size='12sp', color=(0.9,0.9,0.9,1), halign='left'))
+        prof_box.add_widget(user_card)
+
+        # Profile Options
+        options = ["📦 My Orders & History", "📍 Shipping Addresses", "💳 Payment Methods", "⚙️ Account Settings"]
+        for opt in options:
+            btn = Button(text=opt, size_hint_y=None, height=dp(45), background_color=(0.12, 0.16, 0.23, 1), color=(1,1,1,1), halign='left')
+            prof_box.add_widget(btn)
+
+        # Logout Button
+        logout_btn = Button(text="Sign Out", size_hint_y=None, height=dp(45), background_color=(0.9, 0.2, 0.2, 1), bold=True)
+        logout_btn.bind(on_release=self.sign_out)
+        prof_box.add_widget(logout_btn)
+
+        scroll.add_widget(prof_box)
+        layout.add_widget(scroll)
+
+        layout.add_widget(build_bottom_nav(self.manager, 'profile'))
+        self.add_widget(layout)
+
+    def sign_out(self, instance):
+        self.manager.current = 'login'
+
+# GLOBAL BOTTOM NAV HELPER
+def build_bottom_nav(manager_ref, current_screen):
+    bottom_nav = BoxLayout(size_hint_y=None, height=dp(48), spacing=dp(2))
+    nav_items = [("Home", 'home'), ("Categories", 'categories'), ("Alerts", 'alerts'), ("Profile", 'profile')]
+    
+    for name, screen_name in nav_items:
+        is_active = (screen_name == current_screen)
+        bg = (0.23, 0.51, 0.96, 1) if is_active else (0.12, 0.16, 0.23, 1)
+        btn = Button(text=name, background_color=bg, color=(1, 1, 1, 1), font_size='11sp', bold=is_active)
+        btn.bind(on_release=lambda x, s=screen_name: switch_screen(manager_ref, s))
+        bottom_nav.add_widget(btn)
+    return bottom_nav
+
+def switch_screen(manager_ref, screen_name):
+    if manager_ref:
+        manager_ref.current = screen_name
+
+# ================= 6. MAIN APP MANAGER =================
 class ShopZoneApp(App):
     def build(self):
         sm = ScreenManager()
         sm.add_widget(LoginScreen(name='login'))
         sm.add_widget(HomeScreen(name='home'))
-        sm.add_widget(SimpleScreen(title_text="Categories", name='categories'))
-        sm.add_widget(SimpleScreen(title_text="Notifications & Alerts", name='alerts'))
-        sm.add_widget(SimpleScreen(title_text="User Profile", name='profile'))
+        sm.add_widget(CategoriesScreen(name='categories'))
+        sm.add_widget(AlertsScreen(name='alerts'))
+        sm.add_widget(ProfileScreen(name='profile'))
         return sm
 
 if __name__ == '__main__':
