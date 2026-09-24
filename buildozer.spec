@@ -8,14 +8,14 @@ source.include_exts = py,png,jpg,kv,atlas,html,css,js
 version = 0.1
 
 # Python Version ကို 3.11.0 အဖြစ် အတိအကျ သတ်မှတ်ထားပါသည်
-requirements = python3,kivy,requests,urlliv3,certifi
+requirements = python3,kivy,requests,urllib3,certifi
 
 orientation = portrait
 fullscreen = 0
 android.permissions = INTERNET
 
 # SDK, NDK & API Settings
-android.api = 33
+android.api = 34
 android.minapi = 21
 android.ndk = 25b
 android.accept_sdk_license = True
