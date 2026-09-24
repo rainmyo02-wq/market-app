@@ -34,12 +34,10 @@ jobs:
           python -m pip install --upgrade pip setuptools
           pip install "cython<3.0.0" buildozer
 
-      - name: Build Android APK with Python 3.11
+      - name: Build Android APK
         run: |
           rm -rf .buildozer
           rm -rf ~/.buildozer
-          # Force python-for-android to use Python 3.11
-          export PYTHON3_VERSION=3.11
           buildozer -v android debug
 
       - name: Upload APK Artifact
