@@ -38,7 +38,7 @@ jobs:
 
       - name: Build Android APK
         run: |
-          rm -rf .buildozer/android/platform/build-arm64-v8a
+          rm -rf .buildozer
           buildozer -v android debug
 
       - name: Upload APK Artifact
