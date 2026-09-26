@@ -1,40 +1,34 @@
-from kivymd.app import MDApp
-from kivymd.uix.screen import MDScreen
-from kivymd.uix.button import MDRaisedButton
-from kivymd.uix.label import MDLabel
-from kivymd.uix.boxlayout import MDBoxLayout
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.uix.button import Button
 from kivy.core.window import Window
 
 Window.size = (360, 640)
 
-class MainScreen(MDScreen):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        layout = MDBoxLayout(orientation='vertical', padding=20, spacing=20)
+class ShopApp(App):
+    def build(self):
+        layout = BoxLayout(orientation='vertical', padding=30, spacing=20)
         
-        self.label = MDLabel(
+        self.label = Label(
             text="Welcome to Shop Zone",
-            halign="center",
-            font_style="H5"
+            font_size='22sp',
+            halign='center'
         )
         
-        btn = MDRaisedButton(
+        btn = Button(
             text="Click Me",
-            pos_hint={"center_x": .5},
-            on_release=self.on_click
+            size_hint=(1, 0.2),
+            background_color=(0.2, 0.6, 1, 1)
         )
+        btn.bind(on_press=self.on_button_click)
         
         layout.add_widget(self.label)
         layout.add_widget(btn)
-        self.add_widget(layout)
+        return layout
 
-    def on_click(self, instance):
-        self.label.text = "Button Clicked Successfully!"
+    def on_button_click(self, instance):
+        self.label.text = "App is working successfully!"
 
-class ShopApp(MDApp):
-    def build(self):
-        self.theme_cls.primary_palette = "Blue"
-        return MainScreen()
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     ShopApp().run()
