@@ -1,0 +1,156 @@
+from kivymd.app import MDApp
+from kivy.uix.screenmanager import ScreenManager
+from kivymd.uix.screen import MDScreen
+from kivy.lang import Builder
+from kivy.core.window import Window
+import json
+import os
+
+Window.size = (360, 640)
+
+KV = '''
+ScreenManager:
+    LoginChoiceScreen:
+    PhoneLoginScreen:
+    OTPVerificationScreen:
+    MainScreen:
+
+<LoginChoiceScreen>:
+    name: "login_choice"
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: "20dp"
+        spacing: "20dp"
+        pos_hint: {"center_x": .5, "center_y": .5}
+        adaptive_height: True
+        
+        MDLabel:
+            text: "Welcome to Shop Zone"
+            font_style: "H5"
+            halign: "center"
+            
+        MDRaisedButton:
+            text: "Login with Phone Number"
+            pos_hint: {"center_x": .5}
+            on_release: app.root.current = "phone_login"
+
+<PhoneLoginScreen>:
+    name: "phone_login"
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: "20dp"
+        spacing: "20dp"
+        pos_hint: {"center_x": .5, "center_y": .5}
+        adaptive_height: True
+        
+        MDLabel:
+            text: "Enter Phone Number"
+            font_style: "H5"
+            halign: "center"
+            
+        MDTextField:
+            id: phone_input
+            hint_text: "+959..."
+            mode: "rectangle"
+            icon_left: "phone"
+            
+        MDRaisedButton:
+            text: "Send SMS Code"
+            pos_hint: {"center_x": .5}
+            on_release: app.send_sms_code(phone_input.text)
+            
+        MDFlatButton:
+            text: "Back"
+            pos_hint: {"center_x": .5}
+            on_release: app.root.current = "login_choice"
+
+<OTPVerificationScreen>:
+    name: "otp_verify"
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: "20dp"
+        spacing: "20dp"
+        pos_hint: {"center_x": .5, "center_y": .5}
+        adaptive_height: True
+        
+        MDLabel:
+            text: "Enter 6-digit Code"
+            font_style: "H5"
+            halign: "center"
+            
+        MDTextField:
+            id: otp_input
+            hint_text: "123456"
+            mode: "rectangle"
+            icon_left: "message-processing"
+            
+        MDRaisedButton:
+            text: "Verify & Login"
+            pos_hint: {"center_x": .5}
+            on_release: app.verify_otp(otp_input.text)
+
+<MainScreen>:
+    name: "main"
+    MDBoxLayout:
+        orientation: 'vertical'
+        MDTopAppBar:
+            title: "Shop Zone - Main"
+            right_action_items: [["logout", lambda x: app.logout()]]
+        MDLabel:
+            text: "You are successfully logged in!"
+            halign: "center"
+'''
+
+class LoginChoiceScreen(MDScreen):
+    pass
+
+class PhoneLoginScreen(MDScreen):
+    pass
+
+class OTPVerificationScreen(MDScreen):
+    pass
+
+class MainScreen(MDScreen):
+    pass
+
+class ShopApp(MDApp):
+    def build(self):
+        self.theme_cls.primary_palette = "Blue"
+        return Builder.load_string(KV)
+
+    def on_start(self):
+        # Check if user is already logged in from previous session
+        if os.path.exists("user_token.json"):
+            print("Auto Login Successful")
+            self.root.current = "main"
+        else:
+            self.root.current = "login_choice"
+
+    def send_sms_code(self, phone_number):
+        if phone_number == "":
+            print("Please enter a valid phone number")
+            return
+            
+        print(f"Sending OTP to {phone_number}...")
+        # Note: Actual Firebase Phone Auth or Twilio API call goes here
+        # Moving to OTP Verification screen
+        self.root.current = "otp_verify"
+
+    def verify_otp(self, otp_code):
+        print(f"Verifying Code: {otp_code}")
+        # Note: Actual verification logic goes here
+        
+        # If verification is successful, save token and login
+        mock_token = {"phone_logged_in": True}
+        with open("user_token.json", "w") as f:
+            json.dump(mock_token, f)
+            
+        self.root.current = "main"
+
+    def logout(self):
+        if os.path.exists("user_token.json"):
+            os.remove("user_token.json")
+        self.root.current = "login_choice"
+
+if __name__ == "__main__":
+    ShopApp().run()
