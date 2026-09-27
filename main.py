@@ -1,107 +1,127 @@
-from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.label import Label
-from kivy.uix.button import Button
-from kivy.uix.textinput import TextInput
+from kivymd.app import MDApp
+from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.card import MDCard
+from kivymd.uix.label import MDLabel
+from kivymd.uix.button import MDRaisedButton
+from kivymd.uix.textfield import MDTextField
+from kivymd.uix.toolbar import MDTopAppBar
+from kivymd.uix.gridlayout import MDGridLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.image import AsyncImage
 from kivy.core.window import Window
-from kivy.graphics import Color, RoundedRectangle
+from kivy.metrics import dp
 
-# Product တစ်ခုချင်းစီအတွက် Background ပါသော Card ပုံစံပြုလုပ်ခြင်း
-class ProductCard(BoxLayout):
-    def __init__(self, **kwargs):
+class ProductCard(MDCard):
+    def __init__(self, product_name, price, image_url, add_to_cart_callback, **kwargs):
         super().__init__(**kwargs)
-        self.orientation = 'horizontal'
+        self.orientation = "horizontal"
+        self.padding = dp(10)
+        self.spacing = dp(15)
         self.size_hint_y = None
-        self.height = 130
-        self.padding = 10
-        self.spacing = 15
-        
-        # အနောက်ခံ အရောင်နှင့် ထောင့်ဝိုင်းဆွဲခြင်း
-        with self.canvas.before:
-            Color(0.12, 0.12, 0.12, 1) 
-            self.rect = RoundedRectangle(radius=[15])
-        self.bind(pos=self.update_rect, size=self.update_rect)
+        self.height = dp(140)
+        self.elevation = 2  # Shadow effect for the card
+        self.radius = [dp(15)]
+        self.md_bg_color = (1, 1, 1, 1) # White card background
 
-    def update_rect(self, *args):
-        self.rect.pos = self.pos
-        self.rect.size = self.size
+        # Product Image
+        img = AsyncImage(source=image_url, size_hint_x=0.35)
+        self.add_widget(img)
 
-class ShopZoneApp(App):
+        # Product Name and Price
+        info_box = MDBoxLayout(orientation="vertical", size_hint_x=0.4, padding=(dp(5), dp(15), dp(5), dp(15)))
+        name_lbl = MDLabel(text=f"[b]{product_name}[/b]", markup=True, font_style="Subtitle1", theme_text_color="Primary")
+        price_lbl = MDLabel(text=price, font_style="H6", theme_text_color="Custom", text_color=(0.8, 0.2, 0.1, 1))
+        info_box.add_widget(name_lbl)
+        info_box.add_widget(price_lbl)
+        self.add_widget(info_box)
+
+        # Add to Cart Button
+        btn_box = MDBoxLayout(orientation="vertical", size_hint_x=0.25, padding=dp(10))
+        buy_btn = MDRaisedButton(text="Add to Cart", md_bg_color=(0.1, 0.6, 0.8, 1), pos_hint={"center_y": 0.5})
+        buy_btn.bind(on_press=lambda x: add_to_cart_callback(product_name))
+        btn_box.add_widget(buy_btn)
+        self.add_widget(btn_box)
+
+class ShopZoneApp(MDApp):
     def build(self):
-        # App တစ်ခုလုံး၏ နောက်ခံအရောင် (အမည်းရင့်)
-        Window.clearcolor = (0.05, 0.05, 0.05, 1)
+        # UI Colors and Theme
+        self.theme_cls.primary_palette = "DeepPurple"
+        self.theme_cls.accent_palette = "Amber"
+        self.theme_cls.theme_style = "Light"
+        Window.clearcolor = (0.95, 0.95, 0.95, 1) # Light gray app background
+
         self.cart_count = 0
         
         self.all_products = [
-            {"name": "Wireless Mouse", "price": "$25.00", "image": "https://cdn-icons-png.flaticon.com/512/2685/2685810.png"},
-            {"name": "Mechanical Keyboard", "price": "$65.00", "image": "https://cdn-icons-png.flaticon.com/512/10002/10002366.png"},
-            {"name": "Gaming Headset", "price": "$45.00", "image": "https://cdn-icons-png.flaticon.com/512/3043/3043888.png"},
-            {"name": "Smart Watch", "price": "$120.00", "image": "https://cdn-icons-png.flaticon.com/512/3233/3233515.png"},
-            {"name": "Running Shoes", "price": "$55.00", "image": "https://cdn-icons-png.flaticon.com/512/2553/2553742.png"}
+            {"name": "Wireless Mouse", "price": "$25.00", "image": "https://img.icons8.com/color/150/000000/mouse.png"},
+            {"name": "Mechanical Keyboard", "price": "$65.00", "image": "https://img.icons8.com/color/150/000000/keyboard.png"},
+            {"name": "Gaming Headset", "price": "$45.00", "image": "https://img.icons8.com/color/150/000000/headphones.png"},
+            {"name": "Smart Watch", "price": "$120.00", "image": "https://img.icons8.com/color/150/000000/smart-watch.png"},
+            {"name": "Running Shoes", "price": "$55.00", "image": "https://img.icons8.com/color/150/000000/trainers.png"}
         ]
 
-        root_layout = BoxLayout(orientation='vertical', padding=15, spacing=15)
+        main_layout = MDBoxLayout(orientation='vertical')
+
+        # 1. Top App Bar
+        self.toolbar = MDTopAppBar(
+            title="My Own Shop",
+            elevation=4,
+            right_action_items=[["cart", lambda x: self.on_cart_click()]]
+        )
+        main_layout.add_widget(self.toolbar)
+
+        # 2. Search Bar Layout
+        search_box = MDBoxLayout(orientation='horizontal', size_hint_y=None, height=dp(70), padding=dp(10), spacing=dp(10))
         
-        header_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.1), spacing=10)
-        self.search_input = TextInput(hint_text='Search items...', multiline=False, size_hint=(0.5, 1))
-        search_btn = Button(text='Search', size_hint=(0.25, 1), background_color=(0.8, 0.5, 0, 1))
+        self.search_input = MDTextField(
+            hint_text="Search Products...", 
+            mode="round", 
+            size_hint_x=0.7,
+            fill_color_normal=(1, 1, 1, 1)
+        )
+        
+        search_btn = MDRaisedButton(
+            text="Search", 
+            md_bg_color=self.theme_cls.accent_color, 
+            text_color=(0, 0, 0, 1), 
+            size_hint_x=0.3, 
+            pos_hint={"center_y": 0.5}
+        )
         search_btn.bind(on_press=self.on_search)
         
-        self.cart_btn = Button(text='Cart (0)', size_hint=(0.25, 1), background_color=(0.1, 0.5, 0.1, 1))
-        
-        header_layout.add_widget(self.search_input)
-        header_layout.add_widget(search_btn)
-        header_layout.add_widget(self.cart_btn)
-        root_layout.add_widget(header_layout)
+        search_box.add_widget(self.search_input)
+        search_box.add_widget(search_btn)
+        main_layout.add_widget(search_box)
 
-        scroll = ScrollView(size_hint=(1, 0.9))
-        self.products_layout = GridLayout(cols=1, spacing=15, size_hint_y=None)
-        self.products_layout.bind(minimum_height=self.products_layout.setter('height'))
+        # 3. Product List (Scrollable)
+        scroll = ScrollView()
+        self.products_layout = MDGridLayout(cols=1, adaptive_height=True, padding=dp(15), spacing=dp(15))
         
         self.load_products(self.all_products)
         
         scroll.add_widget(self.products_layout)
-        root_layout.add_widget(scroll)
+        main_layout.add_widget(scroll)
 
-        return root_layout
+        return main_layout
 
     def load_products(self, products):
-        self.products_layout.clear_widgets() 
-        
+        self.products_layout.clear_widgets()
         for p in products:
-            item_box = ProductCard()
-            
-            img = AsyncImage(source=p['image'], size_hint=(0.3, 1))
-            
-            info_box = BoxLayout(orientation='vertical', size_hint=(0.4, 1), padding=[0, 10, 0, 10])
-            name_lbl = Label(text=f"[b]{p['name']}[/b]", markup=True, halign='left', valign='bottom', font_size='18sp')
-            name_lbl.bind(size=name_lbl.setter('text_size'))
-            price_lbl = Label(text=f"[b][color=ff9900]{p['price']}[/color][/b]", markup=True, halign='left', valign='top', font_size='18sp')
-            price_lbl.bind(size=price_lbl.setter('text_size'))
-            
-            info_box.add_widget(name_lbl)
-            info_box.add_widget(price_lbl)
-            
-            buy_btn = Button(text='Add to Cart', size_hint=(0.3, 0.4), pos_hint={'center_y': 0.5}, background_color=(0.1, 0.4, 0.8, 1))
-            buy_btn.bind(on_press=lambda inst, n=p['name']: self.add_to_cart(n))
-            
-            item_box.add_widget(img)
-            item_box.add_widget(info_box)
-            item_box.add_widget(buy_btn)
-            
-            self.products_layout.add_widget(item_box)
+            card = ProductCard(p['name'], p['price'], p['image'], self.add_to_cart)
+            self.products_layout.add_widget(card)
 
     def on_search(self, instance):
         query = self.search_input.text.lower()
-        filtered_products = [p for p in self.all_products if query in p['name'].lower()]
-        self.load_products(filtered_products)
+        filtered = [p for p in self.all_products if query in p['name'].lower()]
+        self.load_products(filtered)
 
     def add_to_cart(self, item_name):
         self.cart_count += 1
-        self.cart_btn.text = f'Cart ({self.cart_count})'
+        self.toolbar.title = f"My Own Shop ({self.cart_count} in Cart)"
+
+    def on_cart_click(self):
+        # You can add cart view logic here later
+        pass
 
 if __name__ == '__main__':
     ShopZoneApp().run()
