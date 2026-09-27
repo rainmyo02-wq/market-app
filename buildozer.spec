@@ -7,7 +7,7 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,html,css,js
 version = 0.1
 
-requirements = python3,kivy,kivymd,pillow,requests
+requirements = python3,kivy==2.3.0,kivymd==2.0.1,pillow,requests,pyjnius==1.6.0
 orientation = portrait
 fullscreen = 0
 android.permissions = INTERNET
