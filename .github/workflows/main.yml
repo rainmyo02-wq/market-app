@@ -1,21 +1,32 @@
-from kivymd.app import MDApp
-from kivy.core.window import Window
-from ui import create_main_ui 
+name: Build Android APK
 
-class ShopZoneApp(MDApp):
-    def build(self):
-        self.theme_cls.primary_palette = "DeepPurple"
-        self.theme_cls.accent_palette = "Amber"
-        self.theme_cls.theme_style = "Light"
-        Window.clearcolor = (0.95, 0.95, 0.95, 1)
+on: [push]
 
-        self.cart_count = 0
-        return create_main_ui(self)
+jobs:
+  build:
+    runs-on: ubuntu-22.04
 
-    def add_to_cart(self, item_name):
-        self.cart_count += 1
-        if hasattr(self, 'toolbar'):
-            self.toolbar.title = f"Shop Zone ({self.cart_count} in Cart)"
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
 
-if __name__ == '__main__':
-    ShopZoneApp().run()
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential libltdl-dev libffi-dev libssl-dev python3-pip zip unzip
+          pip install --upgrade pip
+          pip install buildozer "cython<3.0.0" virtualenv
+
+      - name: Build APK
+        run: buildozer android debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ShopZone-APK
+          path: bin/*.apk
