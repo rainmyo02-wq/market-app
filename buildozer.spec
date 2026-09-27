@@ -5,7 +5,7 @@ package.domain = org.test
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
 version = 0.1
-requirements = python3,kivy==2.3.0,kivymd==1.2.0,pillow==10.2.0,requests,pyjnius==1.6.0
+requirements = python3,kivy==2.3.0,kivymd==1.2.0,pillow==10.2.0,requests,pyjnius
 orientation = portrait
 android.permissions = INTERNET
 android.archs = arm64-v8a
