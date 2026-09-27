@@ -7,10 +7,32 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.image import AsyncImage
 from kivy.core.window import Window
+from kivy.graphics import Color, RoundedRectangle
+
+# Product တစ်ခုချင်းစီအတွက် Background ပါသော Card ပုံစံပြုလုပ်ခြင်း
+class ProductCard(BoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.orientation = 'horizontal'
+        self.size_hint_y = None
+        self.height = 130
+        self.padding = 10
+        self.spacing = 15
+        
+        # အနောက်ခံ အရောင်နှင့် ထောင့်ဝိုင်းဆွဲခြင်း
+        with self.canvas.before:
+            Color(0.12, 0.12, 0.12, 1) 
+            self.rect = RoundedRectangle(radius=[15])
+        self.bind(pos=self.update_rect, size=self.update_rect)
+
+    def update_rect(self, *args):
+        self.rect.pos = self.pos
+        self.rect.size = self.size
 
 class ShopZoneApp(App):
     def build(self):
-        Window.clearcolor = (0.1, 0.1, 0.1, 1) 
+        # App တစ်ခုလုံး၏ နောက်ခံအရောင် (အမည်းရင့်)
+        Window.clearcolor = (0.05, 0.05, 0.05, 1)
         self.cart_count = 0
         
         self.all_products = [
@@ -21,14 +43,14 @@ class ShopZoneApp(App):
             {"name": "Running Shoes", "price": "$55.00", "image": "https://cdn-icons-png.flaticon.com/512/2553/2553742.png"}
         ]
 
-        root_layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
+        root_layout = BoxLayout(orientation='vertical', padding=15, spacing=15)
         
-        header_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.1), spacing=5)
+        header_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.1), spacing=10)
         self.search_input = TextInput(hint_text='Search items...', multiline=False, size_hint=(0.5, 1))
-        search_btn = Button(text='Search', size_hint=(0.25, 1), background_color=(1, 0.6, 0, 1))
+        search_btn = Button(text='Search', size_hint=(0.25, 1), background_color=(0.8, 0.5, 0, 1))
         search_btn.bind(on_press=self.on_search)
         
-        self.cart_btn = Button(text='Cart (0)', size_hint=(0.25, 1), background_color=(0.2, 0.8, 0.2, 1))
+        self.cart_btn = Button(text='Cart (0)', size_hint=(0.25, 1), background_color=(0.1, 0.5, 0.1, 1))
         
         header_layout.add_widget(self.search_input)
         header_layout.add_widget(search_btn)
@@ -50,20 +72,20 @@ class ShopZoneApp(App):
         self.products_layout.clear_widgets() 
         
         for p in products:
-            item_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=100, spacing=10)
+            item_box = ProductCard()
             
             img = AsyncImage(source=p['image'], size_hint=(0.3, 1))
             
-            info_box = BoxLayout(orientation='vertical', size_hint=(0.4, 1))
-            name_lbl = Label(text=f"[b]{p['name']}[/b]", markup=True, halign='left', valign='bottom')
+            info_box = BoxLayout(orientation='vertical', size_hint=(0.4, 1), padding=[0, 10, 0, 10])
+            name_lbl = Label(text=f"[b]{p['name']}[/b]", markup=True, halign='left', valign='bottom', font_size='18sp')
             name_lbl.bind(size=name_lbl.setter('text_size'))
-            price_lbl = Label(text=f"[color=ff9900]{p['price']}[/color]", markup=True, halign='left', valign='top')
+            price_lbl = Label(text=f"[b][color=ff9900]{p['price']}[/color][/b]", markup=True, halign='left', valign='top', font_size='18sp')
             price_lbl.bind(size=price_lbl.setter('text_size'))
             
             info_box.add_widget(name_lbl)
             info_box.add_widget(price_lbl)
             
-            buy_btn = Button(text='Add to Cart', size_hint=(0.3, 0.6), pos_hint={'center_y': 0.5}, background_color=(0.2, 0.6, 1, 1))
+            buy_btn = Button(text='Add to Cart', size_hint=(0.3, 0.4), pos_hint={'center_y': 0.5}, background_color=(0.1, 0.4, 0.8, 1))
             buy_btn.bind(on_press=lambda inst, n=p['name']: self.add_to_cart(n))
             
             item_box.add_widget(img)
